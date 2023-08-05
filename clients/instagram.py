@@ -1,4 +1,3 @@
-import datetime
 import io
 import os
 import requests
@@ -31,13 +30,11 @@ class _InstagramClient(object):
     def get_user_id(self, username: str) -> int:
         return instaloader.Profile.from_username(context=self.client.context, username=username).userid
 
-    def get_stories(self, user_id: int, not_before: datetime.timedelta) -> typing.List[post.Post]:
-        now = datetime.datetime.now().astimezone()
+    def get_stories(self, user_id: int) -> typing.List[post.Post]:
         stories = []
         for story in self.client.get_stories(userids=[user_id]):
             for item in story.get_items():
-                if item.date_local > (now - not_before):
-                    stories.append(self._build_post_from_story(story=item))
+                stories.append(self._build_post_from_story(story=item))
 
         return stories
 
@@ -49,6 +46,7 @@ class _InstagramClient(object):
 
         with requests.get(url=url) as resp:
             return post.Post(
+                pk=story.mediaid,
                 author=story.owner_profile.username,
                 description=story.caption,
                 buffer=io.BytesIO(resp.content),

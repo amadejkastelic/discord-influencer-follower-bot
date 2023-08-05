@@ -1,11 +1,11 @@
 import asyncio
-import datetime
 import logging
 import os
 import random
 
 import discord
 
+import db
 import utils
 from clients import instagram
 
@@ -26,11 +26,15 @@ class DiscordClient(discord.Client):
         client = instagram.InstagramClientSingleton.get_instance()
         user_id = client.get_user_id(os.getenv('INSTAGRAM_USERNAME'))
 
+        database = db.InfluencerDB()
+
         await self.wait_until_ready()
 
         channel = self.get_channel(int(os.getenv('DISCORD_CHANNEL_ID')))
         while not self.is_closed():
-            for story in client.get_stories(user_id=user_id, not_before=datetime.timedelta(minutes=5)):
+            for story in client.get_stories(user_id=user_id):
+                if database.is_seen(pk=story.pk):
+                    continue
                 file = None
                 if story.buffer:
                     file = discord.File(
@@ -42,8 +46,9 @@ class DiscordClient(discord.Client):
                     file=file,
                     suppress_embeds=True,
                 )
+                database.mark_seen(pk=story.pk)
 
-            await asyncio.sleep(300)
+            await asyncio.sleep(10)
 
 
 intents = discord.Intents.default()
