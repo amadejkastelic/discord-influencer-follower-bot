@@ -11,6 +11,7 @@ WORKDIR /app
 COPY Pipfile ./
 COPY Pipfile.lock ./
 COPY main.py ./
+COPY db.py ./
 COPY utils.py ./
 COPY clients/* ./clients/
 COPY models/* ./models/
