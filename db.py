@@ -2,7 +2,6 @@ import sqlite3
 
 
 class InfluencerDB(object):
-
     def __init__(self):
         self.conn = sqlite3.connect('post.db')
         cur = self.conn.cursor()

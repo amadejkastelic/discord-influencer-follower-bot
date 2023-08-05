@@ -17,11 +17,7 @@ class Post:
     created: typing.Optional[datetime.datetime] = None
 
     def __str__(self) -> str:
-        return (
-            '📕 Description: {description}\n'
-            '🧑🏻‍🎨 Author: {author}\n'
-            '📅 Created: {created}\n'
-        ).format(
+        return ('📕 Description: {description}\n' '🧑🏻‍🎨 Author: {author}\n' '📅 Created: {created}\n').format(
             author=self.author or '❌',
             created=self.created.strftime('%H:%M · %b %-d, %Y') if self.created else '❌',
             description=self.description or '❌',
