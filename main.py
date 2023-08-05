@@ -30,7 +30,7 @@ class DiscordClient(discord.Client):
 
         channel = self.get_channel(int(os.getenv('DISCORD_CHANNEL_ID')))
         while not self.is_closed():
-            for story in client.get_stories(user_id=user_id, not_before=datetime.timedelta(hours=12)):
+            for story in client.get_stories(user_id=user_id, not_before=datetime.timedelta(minutes=5)):
                 file = None
                 if story.buffer:
                     file = discord.File(
