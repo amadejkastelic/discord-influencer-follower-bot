@@ -48,7 +48,7 @@ class DiscordClient(discord.Client):
                 )
                 database.mark_seen(pk=story.pk)
 
-            await asyncio.sleep(10)
+            await asyncio.sleep(300)
 
 
 intents = discord.Intents.default()
