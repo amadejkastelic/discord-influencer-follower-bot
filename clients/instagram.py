@@ -40,15 +40,17 @@ class _InstagramClient(object):
             with requests.get(url=url) as resp:
                 buffer = io.BytesIO(resp.content)
 
-            stories.append(post.Post(
-                pk=story.pk,
-                author=story.user.username,
-                created=story.taken_at.astimezone(),
-                mentions=[mention.user.full_name for mention in story.mentions],
-                links=[str(link.webUri) for link in story.links],
-                hashtags=[hashtag.hashtag.name for hashtag in story.hashtags],
-                locations=[f'{location.location.name} - {location.location.city}' for location in story.locations],
-                buffer=buffer,
-            ))
+            stories.append(
+                post.Post(
+                    pk=story.pk,
+                    author=story.user.username,
+                    created=story.taken_at.astimezone(),
+                    mentions=[mention.user.full_name for mention in story.mentions],
+                    links=[str(link.webUri) for link in story.links],
+                    hashtags=[hashtag.hashtag.name for hashtag in story.hashtags],
+                    locations=[f'{location.location.name} - {location.location.city}' for location in story.locations],
+                    buffer=buffer,
+                )
+            )
 
         return stories
