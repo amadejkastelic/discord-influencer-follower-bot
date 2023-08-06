@@ -6,21 +6,30 @@ from dataclasses import dataclass
 
 @dataclass
 class Post:
-    pk: int
-    url: typing.Optional[str] = None
+    pk: str
+    mentions: typing.List[str]
+    links: typing.List[str]
+    hashtags: typing.List[str]
+    locations: typing.List[str]
     author: typing.Optional[str] = None
-    description: typing.Optional[str] = None
-    views: typing.Optional[int] = None
-    likes: typing.Optional[int] = None
     buffer: typing.Optional[io.BytesIO] = None
-    spoiler: bool = False
     created: typing.Optional[datetime.datetime] = None
 
     def __str__(self) -> str:
-        return ('📕 Description: {description}\n' '🧑🏻‍🎨 Author: {author}\n' '📅 Created: {created}\n').format(
+        return (
+            '🧑🏻‍🎨 Author: {author}\n'
+            '📅 Created: {created}\n'
+            '🧑‍🤝‍🧑 Mentions: {mentions}\n'
+            '🗺️ Locations: {locations}\n'
+            '📍 Hashtags: {hashtags}\n'
+            '⛓️ Links: {links}\n'
+        ).format(
             author=self.author or '❌',
             created=self.created.strftime('%H:%M · %b %-d, %Y') if self.created else '❌',
-            description=self.description or '❌',
+            mentions=', '.join(self.mentions) if self.mentions else '❌',
+            locations=', '.join(self.locations) if self.locations else '❌',
+            hashtags=', '.join(self.hashtags) if self.hashtags else '❌',
+            links=', '.join(self.links) if self.links else '❌',
         )
 
     def _human_format(self, num: int) -> str:

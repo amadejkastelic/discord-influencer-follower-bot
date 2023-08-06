@@ -3,7 +3,7 @@ import os
 import requests
 import typing
 
-import instaloader
+import instagrapi
 
 from models import post
 
@@ -21,34 +21,34 @@ class InstagramClientSingleton(object):
 
 class _InstagramClient(object):
     def __init__(self):
-        self.client = instaloader.Instaloader(
-            user_agent='Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/116.0'
-        )
-        if os.path.exists('instagram.sess'):
-            self.client.load_session_from_file(username='amadejkastelic', filename='instagram.sess')
+        self.client = instagrapi.Client()
+        username, password = os.getenv('INSTAGRAM_CREDENTIALS').split(':')
+        self.client.login(username, password)
 
     def get_user_id(self, username: str) -> int:
-        return instaloader.Profile.from_username(context=self.client.context, username=username).userid
+        return int(self.client.user_id_from_username(username=username))
 
     def get_stories(self, user_id: int) -> typing.List[post.Post]:
         stories = []
-        for story in self.client.get_stories(userids=[user_id]):
-            for item in story.get_items():
-                stories.append(self._build_post_from_story(story=item))
+        for story in self.client.user_stories(user_id=user_id):
+            match story.media_type:
+                case 1:
+                    url = str(story.thumbnail_url)
+                case 2:
+                    url = str(story.video_url)
+
+            with requests.get(url=url) as resp:
+                buffer = io.BytesIO(resp.content)
+
+            stories.append(post.Post(
+                pk=story.pk,
+                author=story.user.username,
+                created=story.taken_at.astimezone(),
+                mentions=[mention.user.full_name for mention in story.mentions],
+                links=[str(link.webUri) for link in story.links],
+                hashtags=[hashtag.hashtag.name for hashtag in story.hashtags],
+                locations=[f'{location.location.name} - {location.location.city}' for location in story.locations],
+                buffer=buffer,
+            ))
 
         return stories
-
-    def _build_post_from_story(self, story: instaloader.StoryItem) -> post.Post:
-        if story.is_video:
-            url = story.video_url
-        else:
-            url = story.url
-
-        with requests.get(url=url) as resp:
-            return post.Post(
-                pk=story.mediaid,
-                author=story.owner_profile.username,
-                description=story.caption,
-                buffer=io.BytesIO(resp.content),
-                created=story.date_local,
-            )
